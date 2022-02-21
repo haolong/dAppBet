@@ -1,0 +1,807 @@
+<html>
+
+<head>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>
+
+    <!-- Moralis SDK code -->
+    <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+    <script src="https://unpkg.com/moralis/dist/moralis.js"></script>
+
+    <!-- contract ABI -->
+    <script language="javascript" type="text/javascript" src="dappbet_abi.js"></script>
+</head>
+
+
+
+
+<style>
+    .middle-column {
+        max-width: 57%;
+        width: 57%;
+        margin-bottom: 3rem;
+        margin: auto;
+    }
+    
+    @media (max-width: 1410px) {
+        .middle-column {
+            max-width: 71%;
+            width: 71%;
+            margin: auto;
+        }
+    }
+    
+    @media (max-width: 1047px) {
+        .middle-column {
+            max-width: 100%;
+            width: 100%;
+            padding: 8px;
+            border-radius: 0px;
+            margin: auto;
+        }
+    }
+    
+    .match-zone-container {
+        max-width: 100%;
+        margin: 0 auto;
+        width: 100%;
+        padding: 8px;
+        border-radius: 0px;
+        margin-left: 0rem;
+    }
+    
+    .match-zone-container .match-info-bar-container {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 5px 5px 6px #b9b9b9;
+        margin-bottom: 20px;
+        background-size: cover;
+        background-position: center;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-top {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        background: #005cff;
+        padding: 0 20px;
+        border-radius: 8px 8px 0 0;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-top .mt-left {
+        width: 125px;
+        align-self: center;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-top .mt-middle {
+        flex-grow: 1;
+        align-self: center;
+        color: white;
+        font-size: 17px;
+        text-align: center;
+        font-weight: 600;
+        line-height: 20px;
+        padding: 15px 0;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-top .mt-right {
+        width: 125px;
+        align-self: center;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        padding: 15px;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-left {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        justify-content: center;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-middle {
+        align-self: center;
+        flex-grow: 1;
+        flex: 1;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-right {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        justify-content: center;
+        /*flex-direction: row-reverse;*/
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-left .team-icon {
+        height: 160px;
+        width: 160px;
+        background-size: contain;
+        align-self: center;
+        flex-shrink: 0;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-left .team-name {
+        align-self: center;
+        font-size: 22px;
+        line-height: 24px;
+        font-weight: 700;
+        color: floralwhite;
+        margin: 10 5 0 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-left .team-name .tn-full {
+        display: inline-block;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-left .team-name .tn-short {
+        display: none;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-middle {
+        align-self: center;
+        flex-grow: 1;
+        flex: 1;
+        background-color: #f8f9fa8a;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-middle .match-date,
+    .match-zone-container .match-info-bar-container .mib-middle .mm-middle .match-time {
+        font-size: 28px;
+        text-align: center;
+        font-weight: 700;
+        line-height: 30px;
+        color: black;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-right .team-icon {
+        height: 160px;
+        width: 160px;
+        background-size: contain;
+        align-self: center;
+        flex-shrink: 0;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-right .team-name {
+        align-self: center;
+        text-align: right;
+        font-size: 22px;
+        line-height: 24px;
+        font-weight: 700;
+        color: floralwhite;
+        margin: 10 5 0 5px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-right .team-name .tn-full {
+        display: inline-block;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-middle .mm-right .team-name .tn-short {
+        display: none;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-bottom .odds-container {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-between;
+        padding: 0 15px;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-bottom .odds-container .oc-cell {
+        display: flex;
+        flex-grow: 1;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-bottom .odds-container .oc-cell .button-container {
+        width: 100px;
+        max-width: 100px;
+        background-color: #fff;
+        border: 2px solid #c7c7c7;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-bottom .odds-container .oc-cell .button-container .odds-button {
+        background-color: #efefef;
+        text-align: center;
+        font-weight: 600;
+        font-size: 25px;
+        line-height: 55px;
+        height: 55px;
+        display: block;
+        text-decoration: none;
+        color: #00022d;
+        background-size: 16px;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-bottom .odds-container .oc-cell .button-container .logo-icon {
+        display: block;
+        height: 30px;
+        width: 100%;
+        background-position: 50% 50%;
+        background-size: 90% 80%;
+        background-repeat: no-repeat;
+        TEXT-ALIGN: CENTER;
+    }
+    
+    .match-zone-container .match-info-bar-container .mib-bottom .odds-container .oc-cell .odds-title {
+        text-align: center;
+        color: #ced4da;
+        font-weight: 600;
+        line-height: 40px;
+    }
+</style>
+
+<body>
+    <div class="top">
+        <nav>
+            <div class="nav nav-tabs justify-content-center" id="nav-tab" role="tablist">
+                <button class="nav-link active" id="nav-bet-tab" data-bs-toggle="tab" data-bs-target="#nav-bet" type="button" role="tab" aria-controls="nav-bet" aria-selected="true">Live Bets</button>
+                <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">My Profile</button>
+                <!--button class="nav-link" id="nav-contact-tab" data-bs-toggle="tab" data-bs-target="#nav-contact" type="button" role="tab" aria-controls="nav-contact" aria-selected="false">Contact</button-->
+            </div>
+        </nav>
+        <div class="tab-content" id="nav-tabContent">
+            <div id="nav-bet" class="tab-pane fade show active" role="tabpanel" aria-labelledby="nav-bet-tab">
+
+                <div class="middle-column">
+                    <div class="match-zone-container">
+
+                        <a data-bs-toggle="collapse" href="#multiCollapse1" role="button" aria-expanded="false" aria-controls="multiCollapse1">
+                            <div id="match-info-bar-container" class="match-info-bar-container" style="background-image: url(media/bg_championsLeague.png);">
+                                <div class="mib-top">
+                                    <div class="mt-left"> </div>
+                                    <div id="gameTitle" class="mt-middle">
+                                        Estadio Santiago Bernabeu - Spain<br> UEFA Champions League Last 16
+                                    </div>
+                                    <div class="mt-right"> </div>
+                                </div>
+                                <div class="mib-middle">
+                                    <div class="mm-left">
+                                        <div id="gameTeamA_logo" class="team-icon" style="background-image: url(./media/Real-Madrid-CF-HD-Logo.png)"></div>
+                                        <div class="team-name">
+                                            <span id="gameTeamA" class="tn-full">Real Madrid</span>
+                                            <span class="tn-short">RMA</span>
+                                        </div>
+                                    </div>
+                                    <div class="mm-middle">
+                                        <div id="gameDate" class="match-date">Wed 9 Mar</div>
+                                        <div id="gameTime" class="match-time">20:00</div>
+                                    </div>
+                                    <div class="mm-right">
+                                        <div id="gameTeamB_logo" class="team-icon" style="background-image: url(./media/Paris-Saint-Germain-FC-HD-Logo.png)"></div>
+                                        <div class="team-name">
+                                            <span id="gameTeamB" class="tn-full">PSG</span>
+                                            <span class="tn-short">PSG</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mib-bottom">
+                                    <div class="odds-container">
+                                        <div class="oc-cell">
+                                            <div class="button-container " data-bs-toggle="collapse" href="#multiCollapse1" role="button" aria-expanded="false" aria-controls="multiCollapse1">
+                                                <a id="oddsA" class="odds-button live-score-odds-button-hook odds-toggle-hook betslipselection">1</a>
+                                                <div class="logo-icon">Odds</div>
+                                            </div>
+                                            <div class="odds-title">Home</div>
+                                        </div>
+
+                                        <div class="oc-cell">
+                                            <div class="button-container " data-bs-toggle="collapse" href="#multiCollapse1" role="button" aria-expanded="false" aria-controls="multiCollapse1">
+                                                <a id="oddsDraw" class="odds-button live-score-odds-button-hook odds-toggle-hook betslipselection">1</a>
+                                                <div class="logo-icon">Odds</div>
+                                            </div>
+                                            <div class="odds-title">Draw</div>
+                                        </div>
+
+                                        <div class="oc-cell">
+                                            <div class="button-container " data-bs-toggle="collapse" href="#multiCollapse1" role="button" aria-expanded="false" aria-controls="multiCollapse1">
+                                                <a id="oddsB" class="odds-button live-score-odds-button-hook odds-toggle-hook betslipselection">1</a>
+                                                <div class="logo-icon">Odds</div>
+                                            </div>
+                                            <div class="odds-title">Away</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--collapse card body-->>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="collapse multi-collapse" id="multiCollapse1">
+                                            <div class="card card-body">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <div class="input-group mb-3">
+                                                            <input type="number" pattern="[0-9]*" class="form-control" id="bet_stakeA" placeholder="Bet Home" aria-label="Bet Home" aria-describedby="basic-addon2">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text" id="basic-addon2">UHW</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="input-group mb-3">
+                                                            <input type="number" pattern="[0-9]*" class="form-control" id="bet_stakeB" placeholder="Bet Draw" aria-label="Bet Draw" aria-describedby="basic-addon2">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text" id="basic-addon2">UHW</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col">
+                                                        <div class="input-group mb-3">
+                                                            <input type="number" pattern="[0-9]*" class="form-control" id="bet_stakeDraw" placeholder="Bet Away" aria-label="Bet Away" aria-describedby="basic-addon2">
+                                                            <div class="input-group-append">
+                                                                <span class="input-group-text" id="basic-addon2">UHW</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col d-grid gap-2">
+                                                        <button id="submitBet" onclick="submitBet()" type="button" class="btn btn-secondary btn-lg">Submit Bet</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </a>
+
+                        <!--test zone------------------------------------------------------------------------------------>
+
+                        <a data-bs-toggle="collapse" href="#multiCollapseExample2" role="button" aria-expanded="false" aria-controls="multiCollapseExample2">
+                            <div id="match-info-bar-container" class="match-info-bar-container" style="background-image: url(media/bg_championsLeague.png);">
+                                <div class="mib-top">
+                                    <div class="mt-left"> </div>
+                                    <div class="mt-middle">
+                                        Upcoming Sample Match 1<br> UEFA Champions League Last 8
+                                    </div>
+                                    <div class="mt-right"> </div>
+                                </div>
+                                <div class="mib-middle">
+                                    <div class="mm-left">
+                                        <div class="team-icon" style="background-image: url(./media/Real-Madrid-CF-HD-Logo.png)"></div>
+                                        <div class="team-name">
+                                            <span class="tn-full">Real Madrid</span>
+                                            <span class="tn-short">RMA</span>
+                                        </div>
+                                    </div>
+                                    <div class="mm-middle">
+                                        <div class="match-date">Wed 9 Mar </div>
+                                        <div class="match-time">20:00</div>
+                                    </div>
+                                    <div class="mm-right">
+                                        <div class="team-icon" style="background-image: url(./media/Paris-Saint-Germain-FC-HD-Logo.png)"></div>
+                                        <div class="team-name">
+                                            <span class="tn-full">PSG</span>
+                                            <span class="tn-short">PSG</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mib-bottom">
+                                    <div class="odds-container">
+                                        <div class="oc-cell">
+                                            <div class="button-container " data-bs-toggle="collapse" href="#multiCollapseExample2" role="button" aria-expanded="false" aria-controls="multiCollapseExample2">
+                                                <a class="odds-button live-score-odds-button-hook odds-toggle-hook betslipselection">2.6</a>
+                                                <div class="logo-icon">Odds</div>
+                                            </div>
+                                            <div class="odds-title">Home</div>
+                                        </div>
+
+                                        <div class="oc-cell">
+                                            <div class="button-container " data-bs-toggle="collapse" href="#multiCollapseExample2" role="button" aria-expanded="false" aria-controls="multiCollapseExample2">
+                                                <a class="odds-button live-score-odds-button-hook odds-toggle-hook betslipselection">3.8</a>
+                                                <div class="logo-icon">Odds</div>
+                                            </div>
+                                            <div class="odds-title">Draw</div>
+                                        </div>
+
+                                        <div class="oc-cell">
+                                            <div class="button-container " data-bs-toggle="collapse" href="#multiCollapseExample2" role="button" aria-expanded="false" aria-controls="multiCollapseExample2">
+                                                <a class="odds-button live-score-odds-button-hook odds-toggle-hook betslipselection">2.625</a>
+                                                <div class="logo-icon">Odds</div>
+                                            </div>
+                                            <div class="odds-title">Away</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--collapse card body-->>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="collapse multi-collapse" id="multiCollapseExample2">
+                                            <div class="card card-body">
+                                                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </a>
+
+                        <a data-bs-toggle="collapse" href="#multiCollapse3" role="button" aria-expanded="false" aria-controls="multiCollapse3">
+                            <div id="match-info-bar-container" class="match-info-bar-container" style="background-image: url(media/bg_championsLeague.png);">
+                                <div class="mib-top">
+                                    <div class="mt-left"> </div>
+                                    <div class="mt-middle">
+                                        Upcoming Sample Match 2<br> UEFA Champions League Last 16
+                                    </div>
+                                    <div class="mt-right"> </div>
+                                </div>
+                                <div class="mib-middle">
+                                    <div class="mm-left">
+                                        <div class="team-icon" style="background-image: url(./media/Real-Madrid-CF-HD-Logo.png)"></div>
+                                        <div class="team-name">
+                                            <span class="tn-full">Real Madrid</span>
+                                            <span class="tn-short">RMA</span>
+                                        </div>
+                                    </div>
+                                    <div class="mm-middle">
+                                        <div class="match-date">Wed 9 Mar </div>
+                                        <div class="match-time">20:00</div>
+                                    </div>
+                                    <div class="mm-right">
+                                        <div class="team-icon" style="background-image: url(./media/Paris-Saint-Germain-FC-HD-Logo.png)"></div>
+                                        <div class="team-name">
+                                            <span class="tn-full">PSG</span>
+                                            <span class="tn-short">PSG</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mib-bottom">
+                                    <div class="odds-container">
+                                        <div class="oc-cell">
+                                            <div class="button-container " data-bs-toggle="collapse" href="#multiCollapse3" role="button" aria-expanded="false" aria-controls="multiCollapse3">
+                                                <a class="odds-button live-score-odds-button-hook odds-toggle-hook betslipselection">2.6</a>
+                                                <div class="logo-icon">Odds</div>
+                                            </div>
+                                            <div class="odds-title">Home</div>
+                                        </div>
+
+                                        <div class="oc-cell">
+                                            <div class="button-container " data-bs-toggle="collapse" href="#multiCollapse3" role="button" aria-expanded="false" aria-controls="multiCollapse3">
+                                                <a class="odds-button live-score-odds-button-hook odds-toggle-hook betslipselection">3.8</a>
+                                                <div class="logo-icon">Odds</div>
+                                            </div>
+                                            <div class="odds-title">Draw</div>
+                                        </div>
+
+                                        <div class="oc-cell">
+                                            <div class="button-container " data-bs-toggle="collapse" href="#multiCollapse3" role="button" aria-expanded="false" aria-controls="multiCollapse3">
+                                                <a class="odds-button live-score-odds-button-hook odds-toggle-hook betslipselection">2.625</a>
+                                                <div class="logo-icon">Odds</div>
+                                            </div>
+                                            <div class="odds-title">Away</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!--collapse card body-->>
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="collapse multi-collapse" id="multiCollapse3">
+                                            <div class="card card-body">
+                                                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </a>
+                        <!--test zone end-->
+                    </div>
+                </div>
+
+
+            </div>
+            <div id="nav-profile" class="tab-pane fade" role="tabpanel" aria-labelledby="nav-profile-tab">
+                <div class="text-center">
+                    <h3>My Bet History</h3>
+                </div>
+                <table id="bet-stats" class="table table-dark table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Block Number</th>
+                            <th scope="col">Bet Home</th>
+                            <th scope="col">Bet Draw</th>
+                            <th scope="col">Bet Away</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!--tr>
+                            <th scope="row">sample</th>
+                            <td>RMD@PSG</td>
+                            <td>2:2</td>
+                            <td>1888 UHW</td>
+                            <td>Distributed</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">sample</th>
+                            <td>RMD@PSG</td>
+                            <td>-:-</td>
+                            <td>1888 UHW</td>
+                            <td>Live</td>
+                        </tr>
+                        <tr>
+                            <th scope="row">sample</th>
+                            <td>RMD@PSG</td>
+                            <td>4:5</td>
+                            <td>168 UHW</td>
+                            <td>Pending</td>
+                        </tr-->
+                    </tbody>
+                </table>
+
+            </div>
+            <!--div class="tab-pane fade" id="nav-contact" role="tabpanel" aria-labelledby="nav-contact-tab">...</div-->
+        </div>
+    </div>
+
+
+
+
+
+    <!--h1>Moralis Gas Stats</h1>
+
+    <button id="btn-login">Moralis Login</button-->
+    <button id="btn-get-history">Get Bets History</button>
+    <button id="btn-get-stats">Refresh Stats</button>
+
+    <!-- stats will go here -->
+    <ul id="bet-statssss"></ul>
+    <div>
+        Current Account: <span id="web3status">Loading...</span>
+        <br>Contract Interaction Info: <span id="web3info">Loading...</span>
+    </div>
+
+
+    <script>
+        var currentAccount;
+        var dappBet; // the contract
+        // initialize web3
+        async function loadWeb3() {
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                try {
+                    const accounts = await window.ethereum.request({
+                        method: 'eth_requestAccounts'
+                    });
+                    setAccounts(accounts);
+                } catch (error) {
+                    if (error.code === 4001) {
+                        // User rejected request
+                    }
+                    updateStatus(error);
+                }
+            } else {
+                console.log('Please install MetaMask!');
+                updateStatus('Please install MetaMask!');
+            }
+        }
+
+        async function load() {
+            await loadWeb3();
+            // connect to dappBet contract
+            dappBet = await loadContract(); //window.contract = await loadContract();
+            getStats();
+            updateStatus(currentAccount);
+        }
+
+        function updateStatus(_status) {
+            const statusEl = document.getElementById('web3status');
+            statusEl.innerHTML = _status;
+            console.log(_status);
+        }
+
+        function updateInfo(_status) {
+            const statusEl = document.getElementById('web3info');
+            statusEl.innerHTML = _status;
+            console.log(_status);
+        }
+
+        function setAccounts(accounts) {
+            currentAccount = accounts[0];
+            console.log(currentAccount);
+        }
+
+        async function loadContract() {
+            var dappBetAddress = "0xc0fd88b1d9B3d5AD9CF28D241318622BCd006CcA"; //"YOUR_CONTRACT_ADDRESS";
+            return await new window.web3.eth.Contract(dappBetABI, dappBetAddress);
+        }
+
+        //Interacting with contract
+        var game;
+        async function getStats() {
+            updateInfo('Updating Bet information...');
+            game = await dappBet.methods.game().call();
+            updateInfo(`game: ${game.teamA} vs ${game.teamB}`);
+
+            document.getElementById("oddsA").innerHTML = game.oddsA;
+            document.getElementById("oddsDraw").innerHTML = game.oddsDraw;
+            document.getElementById("oddsB").innerHTML = game.oddsB;
+            console.log(game);
+        }
+
+        async function submitBet() {
+            updateInfo('Submiting Bet...');
+            const bet_stakeA = document.getElementById("bet_stakeA").value + 0;
+            const bet_stakeB = document.getElementById("bet_stakeB").value + 0;
+            const bet_stakeDraw = document.getElementById("bet_stakeDraw").value + 0;
+            console.log(bet_stakeA, " ", bet_stakeB, " ", bet_stakeDraw);
+            const res = await dappBet.methods
+                .toBet(bet_stakeA, bet_stakeB, bet_stakeDraw)
+                .send({
+                    from: currentAccount,
+                    value: Web3.utils.toBN("0")
+                })
+                .once('receipt', (receipt) => {
+                    this.updateInfo("blockHash: " + receipt.blockHash);
+                    //console.log(receipt);
+                });
+            console.log(res);
+            getStats();
+        }
+
+        async function getBetHistory() {
+            const firstBlock = 16750339; //First block where the contract generated
+            var latestBlock;
+            var betsHolder = [];
+
+            await web3.eth.getBlock('latest').then(block => {
+                latestBlock = block.number
+            });
+            var rangeBlocks = range(firstBlock, latestBlock, 5000).reverse();
+            console.log(rangeBlocks);
+
+            for (let fromBlock of rangeBlocks) {
+                const res = await dappBet.getPastEvents(
+                    "NewBet", {
+                        filter: { //event element need to be indexed to be filtered
+                            //user: currentAccount 
+                        },
+                        fromBlock: fromBlock,
+                        toBlock: latestBlock //BSC require up to 5000 blocks query
+                    }
+                );
+
+                for (let bet of res) {
+                    if (bet.returnValues.user.toLowerCase() == currentAccount.toLowerCase()) { //filter by user
+                        betsHolder.push(bet);
+                        printBetHistory(bet); //display to webpage
+                    }
+                }
+                //console.log(res);
+                latestBlock = fromBlock;
+            }
+            console.log(betsHolder);
+        }
+
+        //The range generator function
+        const range = (start, stop, step = 1) => Array(Math.ceil((stop - start) / step)).fill(start).map((x, y) => x + y * step)
+
+        function printBetHistory(_bet) {
+            document.getElementById("bet-stats").innerHTML += (
+                '<tr><td>' + _bet.blockNumber + '</td><td>' + _bet.returnValues.stakeA + '</td><td>' + _bet.returnValues.stakeDraw + '</td><td>' + _bet.returnValues.stakeB + '</td></tr>'
+            );
+        }
+
+
+        load();
+
+        document.getElementById("btn-get-stats").onclick = getStats;
+        document.getElementById("btn-get-history").onclick = getBetHistory;
+    </script>
+
+
+    <!--script>
+        // connect to Moralis server
+        const serverUrl = "https://j2xf42pdixb5.usemoralis.com:2053/server"; ///////////////////////////
+        const appId = "ACaUrXV4PoDiHEYoYEIeENTFV76DVgLEkSnUs2rj"; ///////////////////////////
+        Moralis.start({
+            serverUrl,
+            appId
+        });
+
+        // LOG IN WITH METAMASK
+        async function login() {
+            let user = Moralis.User.current();
+            if (!user) {
+                user = await Moralis.authenticate();
+            }
+            console.log("logged in user:", user);
+            getStats();
+        }
+
+        // LOG OUT
+        async function logOut() {
+            await Moralis.User.logOut();
+            console.log("logged out");
+        }
+
+        // bind button click handlers
+        document.getElementById("btn-login").onclick = login;
+        document.getElementById("btn-logout").onclick = logOut;
+        document.getElementById("btn-get-stats").onclick = getStats;
+
+        // refresh stats
+        function getStats() {
+            const user = Moralis.User.current();
+            if (user) {
+                getUserTransactions(user);
+            }
+            getAverageGasPrices();
+        }
+
+        // HISTORICAL TRANSACTIONS
+        async function getUserTransactions(user) {
+            // create query
+            const query = new Moralis.Query("EthTransactions");
+            query.equalTo("from_address", user.get("ethAddress"));
+
+            // subscribe to query updates
+            const subscription = await query.subscribe();
+            handleNewTransaction(subscription);
+
+            // run query
+            const results = await query.find();
+            console.log("user transactions:", results);
+        }
+
+        // REAL-TIME TRANSACTIONS
+        async function handleNewTransaction(subscription) {
+            // log each new transaction
+            subscription.on("create", function(data) {
+                console.log("new transaction: ", data);
+            });
+        }
+
+        // CLOUD FUNCTION
+        async function getAverageGasPrices() {
+            const results = await Moralis.Cloud.run("getAvgGas");
+            console.log("average user gas prices:", results);
+            renderGasStats(results);
+        }
+
+        function renderGasStats(data) {
+            const container = document.getElementById("gas-stats");
+            container.innerHTML = data
+                .map(function(row, rank) {
+                    return `<li>#${rank + 1}: ${Math.round(row.avgGas)} gwei</li>`;
+                })
+                .join("");
+        }
+
+        //get stats on page load
+        getStats();
+    </script-->
+</body>
+
+</html>
